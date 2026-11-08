@@ -174,9 +174,7 @@ namespace groveoleddisplay {
          * @param row which row to display, range from 0 to 15.
          * @param col which col to display, range from 0 to 127.
          */
-        //% blockId=grove_oled_set_text_xy block="%oled|Définir la position : ligne|%row|, colonne|%col"
-        //% row.min=0 row.max=15
-        //% col.min=0 col.max=127
+        //% advanced=true
         setTextXY(row:number, col:number) {
             let col_l:number = col % 16;
             let col_h:number = (col / 16)+0x10;
@@ -279,9 +277,18 @@ namespace groveoleddisplay {
          * Display a integer number
          * @param num a integer number to display.
          */
-        //% blockId=grove_oled_put_number block="%oled|Afficher le nombre|%num|"
+        //% advanced=true
         putNumber(num:number) {
             this.putString(num.toString());
+        }
+
+        /** Display an integer number at a chosen position. */
+        //% blockId=grove_oled_put_number_at block="%oled|Afficher le nombre|%num|à la ligne|%row|, colonne|%col"
+        //% row.min=0 row.max=15
+        //% col.min=0 col.max=127
+        putNumberAt(num:number, row:number, col:number) {
+            this.setTextXY(row, col);
+            this.putNumber(num);
         }
 
         /**
