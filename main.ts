@@ -226,6 +226,47 @@ namespace groveoleddisplay {
         }
 
         /**
+         * Display a string with characters enlarged to twice their normal size.
+         * @param s a string to display.
+         * @param row display page, from 0 to 14 (each page is 8 pixels high).
+         * @param col display column, from 0 to 127.
+         */
+        //% blockId=grove_oled_put_string_large block="%oled|Display large string|%s|at row|%row|and column|%col"
+        //% row.min=0 row.max=14
+        //% col.min=0 col.max=127
+        putStringLarge(s:string, row:number, col:number) {
+            if (row < 0) row = 0;
+            if (row > 14) row = 14;
+            if (col < 0) col = 0;
+
+            let x = col;
+            for (let n=0; n<s.length && x < 128; n++) {
+                let c = s.charCodeAt(n);
+                if (c < 32 || c > 127) c = 32;
+                let glyph = (c - 32) * 8;
+
+                // Expand every source column to two columns and every source
+                // pixel to two vertical pixels (16 pixels, across two pages).
+                for (let i=0; i<8 && x < 128; i++) {
+                    let source = oledFont[glyph + i];
+                    let expanded = 0;
+                    for (let bit=0; bit<8; bit++) {
+                        if ((source & (1 << bit)) != 0) {
+                            expanded = expanded | (3 << (bit * 2));
+                        }
+                    }
+                    for (let repeat=0; repeat<2 && x < 128; repeat++) {
+                        this.setTextXY(row, x);
+                        this.sendData(expanded & 0xff);
+                        this.setTextXY(row + 1, x);
+                        this.sendData((expanded >> 8) & 0xff);
+                        x++;
+                    }
+                }
+            }
+        }
+
+        /**
          * Display a integer number
          * @param num a integer number to display.
          */
