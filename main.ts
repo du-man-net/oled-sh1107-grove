@@ -207,7 +207,9 @@ namespace groveoleddisplay {
                 c = c-32;
             }
 
-            for(let i=0; i< 8;i++){
+            // The last two columns are padding in this font; omit them to
+            // reduce the small-font character cell from 8 to 6 pixels.
+            for(let i=0; i< 6;i++){
                 this.sendData(oledFont[c*8+i]);
             }
         }
@@ -246,15 +248,17 @@ namespace groveoleddisplay {
             if (row > 14) row = 14;
             if (col < 0) col = 0;
 
-            for (let n=0; n<s.length && col + n * 14 < 128; n++) {
+            for (let n=0; n<s.length && col + n * 10 < 128; n++) {
                 let c = s.charCodeAt(n);
                 if (c < 32 || c > 127) c = 32;
                 let glyph = (c - 32) * 8;
-                let charX = col + n * 14;
+                let charX = col + n * 10;
 
                 // Expand every source column to two columns and every source
                 // pixel to two vertical pixels (16 pixels, across two pages).
-                for (let i=0; i<8 && charX + i * 2 < 128; i++) {
+                // Skip the leading blank column and the trailing padding so
+                // the five glyph columns fit the 10-pixel character advance.
+                for (let i=1; i<6 && charX + (i - 1) * 2 < 128; i++) {
                     let source = oledFont[glyph + i];
                     let expanded = 0;
                     for (let bit=0; bit<8; bit++) {
@@ -262,8 +266,8 @@ namespace groveoleddisplay {
                             expanded = expanded | (3 << (bit * 2));
                         }
                     }
-                    for (let repeat=0; repeat<2 && charX + i * 2 + repeat < 128; repeat++) {
-                        let x = charX + i * 2 + repeat;
+                    for (let repeat=0; repeat<2 && charX + (i - 1) * 2 + repeat < 128; repeat++) {
+                        let x = charX + (i - 1) * 2 + repeat;
                         this.setTextXY(row, x);
                         this.sendData(expanded & 0xff);
                         this.setTextXY(row + 1, x);
