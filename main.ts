@@ -102,13 +102,13 @@ const oledFont: uint8[] = [
 /**
  * Functions to operate Grove module.
  */
-//% weight=10 color=#9F79EE icon="\uf108" block="OLED Display"
+//% weight=10 color=#9F79EE icon="\uf108" block="Écran OLED"
 namespace groveoleddisplay {
 
     /**
      * Create Grove - Oled Display
      */
-    //% blockId=grove_oled_create block="Create Oled Display"
+    //% blockId=grove_oled_create block="Créer l’écran OLED"
     export function createOled(): SH1107G
     {
         let oled = new SH1107G();
@@ -144,7 +144,7 @@ namespace groveoleddisplay {
         /**
          * Init Grove - OLED Display
          */
-        //% blockId=grove_oled_init block="%oled|Init Grove - OLED Display"
+        //% blockId=grove_oled_init block="%oled|Initialiser l’écran OLED"
         //% advanced=true
         init() {
             this.sendCommand(0xae);  // Display OFF 
@@ -174,7 +174,7 @@ namespace groveoleddisplay {
          * @param row which row to display, range from 0 to 15.
          * @param col which col to display, range from 0 to 127.
          */
-        //% blockId=grove_oled_set_text_xy block="%oled|Set display position at row|%row|and column|%col"
+        //% blockId=grove_oled_set_text_xy block="%oled|Définir la position : ligne|%row|, colonne|%col"
         //% row.min=0 row.max=15
         //% col.min=0 col.max=127
         setTextXY(row:number, col:number) {
@@ -189,7 +189,7 @@ namespace groveoleddisplay {
         /**
          * Clear display
          */
-        //% blockId=grove_oled_clear_display block="%oled|Clear display"
+        //% blockId=grove_oled_clear_display block="%oled|Effacer l’écran"
         clearDisplay() {
             for(let i:number=0; i<16;i++){
                 this.sendCommand(0xb0+i);
@@ -218,11 +218,20 @@ namespace groveoleddisplay {
          * Display a string
          * @param s a string to display.
          */
-        //% blockId=grove_oled_put_string block="%oled|Display string |%s|"
+        //% advanced=true
         putString(s:string) {
             for (let n=0;n<s.length;n++){
                 this.putChar(s.charCodeAt(n));
             }
+        }
+
+        /** Display small text at a chosen position. */
+        //% blockId=grove_oled_put_string_at block="%oled|Afficher en petit|%s|à la ligne|%row|, colonne|%col"
+        //% row.min=0 row.max=15
+        //% col.min=0 col.max=127
+        putStringAt(s:string, row:number, col:number) {
+            this.setTextXY(row, col);
+            this.putString(s);
         }
 
         /**
@@ -231,7 +240,7 @@ namespace groveoleddisplay {
          * @param row display page, from 0 to 14 (each page is 8 pixels high).
          * @param col display column, from 0 to 127.
          */
-        //% blockId=grove_oled_put_string_large block="%oled|Display large string|%s|at row|%row|and column|%col"
+        //% blockId=grove_oled_put_string_large block="%oled|Afficher en grand|%s|à la ligne|%row|, colonne|%col"
         //% row.min=0 row.max=14
         //% col.min=0 col.max=127
         putStringLarge(s:string, row:number, col:number) {
@@ -239,15 +248,15 @@ namespace groveoleddisplay {
             if (row > 14) row = 14;
             if (col < 0) col = 0;
 
-            let x = col;
-            for (let n=0; n<s.length && x < 128; n++) {
+            for (let n=0; n<s.length && col + n * 14 < 128; n++) {
                 let c = s.charCodeAt(n);
                 if (c < 32 || c > 127) c = 32;
                 let glyph = (c - 32) * 8;
+                let charX = col + n * 14;
 
                 // Expand every source column to two columns and every source
                 // pixel to two vertical pixels (16 pixels, across two pages).
-                for (let i=0; i<8 && x < 128; i++) {
+                for (let i=0; i<8 && charX + i * 2 < 128; i++) {
                     let source = oledFont[glyph + i];
                     let expanded = 0;
                     for (let bit=0; bit<8; bit++) {
@@ -255,12 +264,12 @@ namespace groveoleddisplay {
                             expanded = expanded | (3 << (bit * 2));
                         }
                     }
-                    for (let repeat=0; repeat<2 && x < 128; repeat++) {
+                    for (let repeat=0; repeat<2 && charX + i * 2 + repeat < 128; repeat++) {
+                        let x = charX + i * 2 + repeat;
                         this.setTextXY(row, x);
                         this.sendData(expanded & 0xff);
                         this.setTextXY(row + 1, x);
                         this.sendData((expanded >> 8) & 0xff);
-                        x++;
                     }
                 }
             }
@@ -270,7 +279,7 @@ namespace groveoleddisplay {
          * Display a integer number
          * @param num a integer number to display.
          */
-        //% blockId=grove_oled_put_number block="%oled|Display integer number |%num|"
+        //% blockId=grove_oled_put_number block="%oled|Afficher le nombre|%num|"
         putNumber(num:number) {
             this.putString(num.toString());
         }
@@ -283,7 +292,7 @@ namespace groveoleddisplay {
          * @param column_number
          * @param bitmap
          */
-        //% blockId=grove_oled_draw_bitmap block="%oled|Draw bitmap start at row|%x_start|and column|%y_start|, size: row|%row_number|and column|%column_number|, bitmap:|%bitmap|"
+        //% blockId=grove_oled_draw_bitmap block="%oled|Dessiner l’image : ligne|%x_start|, colonne|%y_start|, hauteur|%row_number|, largeur|%column_number|, données|%bitmap|"
         //% x.min=0 x.max=15
         //% y.min=0 y.max=127
         //% row_number.min=0 row_number.max=4
@@ -329,7 +338,7 @@ namespace groveoleddisplay {
          * @param y
          * @param len
          */
-        //% blockId=grove_oled_draw_hline block="%oled|Draw horizontal line start at x|%x|and y|%y|, length|%len|"
+        //% blockId=grove_oled_draw_hline block="%oled|Tracer une ligne horizontale : x|%x|, y|%y|, longueur|%len|"
         //% y.min=0 y.max=127
         //% x.min=0 x.max=127
         //% len.min=1 len.max=128
@@ -347,7 +356,7 @@ namespace groveoleddisplay {
          * @param y
          * @param len
          */
-        //% blockId=grove_oled_draw_vline block="%oled|Draw vertical line start at x|%x|and y|%y|, length|%len|"
+        //% blockId=grove_oled_draw_vline block="%oled|Tracer une ligne verticale : x|%x|, y|%y|, longueur|%len|"
         //% y.min=0 y.max=127
         //% x.min=0 x.max=127
         //% len.min=1 len.max=128
@@ -393,7 +402,7 @@ namespace groveoleddisplay {
          * @param x2
          * @param y2
          */
-        //% blockId=grove_oled_draw_rec block="%oled|Draw a rectangle start at x|%x1|and y|%y1|, end at x|%x2|and y|%y2|"
+        //% blockId=grove_oled_draw_rec block="%oled|Tracer un rectangle : de x|%x1|, y|%y1|à x|%x2|, y|%y2|"
         //% y1.min=0 y1.max=127
         //% x1.min=0 x1.max=127
         //% y2.min=0 y2.max=127
