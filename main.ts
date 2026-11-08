@@ -248,11 +248,11 @@ namespace groveoleddisplay {
             if (row > 14) row = 14;
             if (col < 0) col = 0;
 
-            for (let n=0; n<s.length && col + n * 10 < 128; n++) {
+            for (let n=0; n<s.length && col + n * 11 < 128; n++) {
                 let c = s.charCodeAt(n);
                 if (c < 32 || c > 127) c = 32;
                 let glyph = (c - 32) * 8;
-                let charX = col + n * 10;
+                let charX = col + n * 11;
 
                 // Expand every source column to two columns and every source
                 // pixel to two vertical pixels (16 pixels, across two pages).
