@@ -287,12 +287,20 @@ namespace groveoleddisplay {
         }
 
         /** Display an integer number at a chosen position. */
-        //% blockId=grove_oled_put_number_at block="%oled|Afficher le nombre|%num|à la ligne|%row|, colonne|%col"
+        //% blockId=grove_oled_put_number_at block="%oled|Afficher le nombre petit|%num|à la ligne|%row|, colonne|%col"
         //% row.min=0 row.max=15
         //% col.min=0 col.max=127
         putNumberAt(num:number, row:number, col:number) {
             this.setTextXY(row, col);
             this.putNumber(num);
+        }
+
+        /** Display an integer number in large font at a chosen position. */
+        //% blockId=grove_oled_put_number_large block="%oled|Afficher le nombre grand|%num|à la ligne|%row|, colonne|%col"
+        //% row.min=0 row.max=14
+        //% col.min=0 col.max=127
+        putNumberLarge(num:number, row:number, col:number) {
+            this.putStringLarge(num.toString(), row, col);
         }
 
         /**
